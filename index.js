@@ -2,6 +2,7 @@ function thunkify(fn){
 
     return function(){
         var called;
+        var callback;
         var args = new Array(arguments.length);
 
         for(var i = 0; i < args.length; ++i) {
@@ -9,15 +10,24 @@ function thunkify(fn){
         }
 
         args.push(function(){
-            if (called) called.apply(null,arguments);
-            else called = arguments
+            // 回调——信任问题：只允许回调一次
+            if (called) return;
+            called = true;
+
+            if (callback) callback.apply(null,arguments);
+            else callback = arguments
         });
 
-        fn.apply(null,args);
+        try{
+            fn.apply(null,args);
+        }catch (err) {
+            // error-first style
+            callback = [err]
+        }
 
         return function(done){
-            if (called) done.apply(null,called);
-            else called = done
+            if (callback) done.apply(null,callback);
+            else callback = done
         }
     }
 }
