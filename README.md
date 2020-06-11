@@ -14,7 +14,7 @@ $.get("http://example.com/api/a",function(data,status){
 var readFile = require('fs').readFile;
 
 thunkify(readFile)("path","utf-8")(function(err){
-  if(err.constructor === Error){
+  if(err instanceof Error){
     console.log(err.message)
   }
 })
